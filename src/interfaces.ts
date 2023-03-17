@@ -26,6 +26,7 @@ export interface IPlanContent {
   maxDuration?: number
   maxBlocks?: IBlocksStats
   maxIo?: number
+  maxEstimateFactor?: number
   Triggers?: ITrigger[]
   JIT?: JIT
   "Query Text"?: string
@@ -54,6 +55,7 @@ export interface IPlanStats {
   maxDuration: number
   maxBlocks: IBlocksStats
   maxIo: number
+  maxEstimateFactor: number
   triggers?: ITrigger[]
   jitTime?: number
   settings?: Settings
@@ -248,3 +250,6 @@ export interface JIT {
   ["Timing"]: Timing
   [key: string]: number | Timing
 }
+
+// A plan node with id, node, isLastSibling, branches
+export type Row = [number, Node, boolean, number[]]

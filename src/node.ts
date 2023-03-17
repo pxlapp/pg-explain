@@ -247,11 +247,27 @@ export default function useNode(
     return [...Array(workersPlanned).keys()].slice().reverse()
   })
 
+  const estimateFactorPercent = computed((): number => {
+    switch (node[NodeProp.PLANNER_ESTIMATE_FACTOR]) {
+      case Infinity:
+        return 100
+      case 1:
+        return 0
+      default:
+        return (
+          ((node[NodeProp.PLANNER_ESTIMATE_FACTOR] || 0) /
+            plan.value.planStats.maxEstimateFactor) *
+          100
+        )
+    }
+  })
+
   return {
     barColor,
     barWidth,
     costClass,
     durationClass,
+    estimateFactorPercent,
     estimationClass,
     executionTimePercent,
     filterTooltip,

@@ -1,0 +1,45 @@
+$grid-progress-padding: 0.25rem;
+.plan-grid {
+  line-height: 0.85em;
+  > table {
+    > tbody, > thead, & {
+      > tr {
+        > th, > td {
+          font-size: $font-size-base;
+          min-width: 20px;
+        }
+      }
+    }
+  }
+
+  .detailed {
+    line-height: initial;
+    margin: 5px;
+    width: calc(100% - 10px) !important;
+    max-width: 700px;
+  }
+
+  .tree-lines {
+    font-family: 'monospace';
+  }
+
+  tr.node {
+    cursor: pointer;
+  }
+  .grid-progress-cell {
+    position: relative;
+
+    .grid-progress {
+      margin-top: 1px;
+    }
+  }
+  .grid-progress {
+    position: absolute;
+    width: 100%;
+    height: initial;
+    top: 0;
+    left: 0;
+    padding-left: $grid-progress-padding;
+    padding-right: $grid-progress-padding;
+  }
+}
