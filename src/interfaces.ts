@@ -238,7 +238,6 @@ export type StatsTableItemType = {
 }
 
 export type ViewOptions = {
-  menuHidden: boolean
   showHighlightBar: boolean
   showPlanStats: boolean
   highlightType: HighlightType
