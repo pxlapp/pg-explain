@@ -198,19 +198,23 @@ function buffersTooltip(node: Node): string {
   }
   text += '<table class="table table-dark table-sm table-borderless mb-0">'
   text += hit
-    ? '<tr><td>Hit:</td><td class="text-end">' + blocks(hit) + "</td></tr>"
+    ? '<tr><td>Hit:</td><td class="text-end">' +
+      blocks(hit, true) +
+      "</td></tr>"
     : ""
   text += read
-    ? '<tr><td>Read:</td><td class="text-end">' + blocks(read) + "</td></tr>"
+    ? '<tr><td>Read:</td><td class="text-end">' +
+      blocks(read, true) +
+      "</td></tr>"
     : ""
   text += dirtied
     ? '<tr><td>Dirtied:</td><td class="text-end">' +
-      blocks(dirtied) +
+      blocks(dirtied, true) +
       "</td></tr>"
     : ""
   text += written
     ? '<tr><td>Written:</td><td class="text-end">' +
-      blocks(written) +
+      blocks(written, true) +
       "</td></tr>"
     : ""
   text += "</table>"
