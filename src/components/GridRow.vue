@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { inject, provide, reactive, ref } from "vue"
+import { computed, inject, provide, reactive, ref } from "vue"
 import type { Ref } from "vue"
 import type { IPlan, Node, ViewOptions } from "@/interfaces"
 import { EstimateDirection, NodeProp } from "@/enums"
@@ -9,6 +9,7 @@ import {
   blocksAsBytes,
   duration,
   factor,
+  formatNodeProp,
   keysToString,
   sortKeys,
 } from "@/filters"
@@ -36,9 +37,25 @@ const {
   rowsRemoved,
   rowsRemovedPercent,
   rowsRemovedPercentString,
+  rowsRemovedProp,
 } = useNode(plan, node, viewOptions)
 const showDetails = ref<boolean>(false)
 provide("updateSize", () => undefined)
+
+const hasSeveralLoops = computed((): boolean => {
+  return (node[NodeProp.ACTUAL_LOOPS] as number) > 1
+})
+
+const tilde = computed((): string => {
+  return hasSeveralLoops.value ? "~" : ""
+})
+
+// returns the formatted prop
+function formattedProp(propName: keyof typeof NodeProp) {
+  const property = NodeProp[propName]
+  const value = node[property]
+  return formatNodeProp(property, value)
+}
 </script>
 <template>
   <tr @click="showDetails = !showDetails" class="node">
@@ -48,7 +65,10 @@ provide("updateSize", () => undefined)
     </td>
     <td class="text-end grid-progress-cell text-nowrap">
       <!-- time -->
-      {{ duration(node[NodeProp.EXCLUSIVE_DURATION]) }}
+      {{ Math.round(node[NodeProp.EXCLUSIVE_DURATION]).toLocaleString() }}
+      <div v-if="showDetails" class="small">
+        {{ duration(node[NodeProp.EXCLUSIVE_DURATION]) }}
+      </div>
       <div class="grid-progress progress rounded-0 bg-transparent">
         <div
           class="bg-primary border-primary"
@@ -83,7 +103,7 @@ provide("updateSize", () => undefined)
     </td>
     <td class="text-end grid-progress-cell text-nowrap">
       <!-- rows -->
-      {{ node[NodeProp.ACTUAL_ROWS_REVISED].toLocaleString() }}
+      {{ tilde + node[NodeProp.ACTUAL_ROWS_REVISED]?.toLocaleString() }}
       <div class="grid-progress progress rounded-0 bg-transparent">
         <div
           class="bg-primary border-primary"
@@ -130,11 +150,15 @@ provide("updateSize", () => undefined)
           :style="{ width: estimateFactorPercent + '%' }"
         ></div>
       </div>
+      <div v-if="showDetails" class="small">
+        Planned:<br />
+        {{ node[NodeProp.PLAN_ROWS_REVISED].toLocaleString() }}
+      </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('loops')">
       <!-- loops -->
       <span v-if="node[NodeProp.ACTUAL_LOOPS] != 1">
-        {{ node[NodeProp.ACTUAL_LOOPS] }}
+        {{ node[NodeProp.ACTUAL_LOOPS].toLocaleString() }}
       </span>
     </td>
     <td
@@ -150,6 +174,9 @@ provide("updateSize", () => undefined)
             style="height: 2px"
             :style="{ width: rowsRemovedPercent + '%' }"
           ></div>
+        </div>
+        <div v-if="showDetails" class="small">
+          {{ tilde + formattedProp(rowsRemovedProp) }}
         </div>
       </template>
     </td>

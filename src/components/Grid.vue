@@ -229,7 +229,7 @@ const columns = computed(() => {
 
 <template>
   <div>
-    <table class="table table-sm table-hover">
+    <table class="table table-sm table-hover table-bordered">
       <thead class="table-dark sticky-top">
         <tr>
           <th :colspan="5 + columnsLeft.length"></th>
