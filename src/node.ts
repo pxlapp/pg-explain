@@ -3,7 +3,12 @@ import _ from "lodash"
 import { computed, onBeforeMount, ref, watch } from "vue"
 import type { Ref } from "vue"
 import type { IPlan, Node, Worker, ViewOptions } from "@/interfaces"
-import { NodeProp, EstimateDirection, HighlightType } from "@/enums"
+import {
+  BufferLocation,
+  NodeProp,
+  EstimateDirection,
+  HighlightType,
+} from "@/enums"
 import { cost, duration, rows } from "@/filters"
 import { numberToColorHsl } from "@/services/color-service"
 
@@ -262,6 +267,86 @@ export default function useNode(
     }
   })
 
+  const sharedHitPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_SHARED_HIT_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.shared]) *
+      100
+    )
+  })
+
+  const sharedReadPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_SHARED_READ_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.shared]) *
+      100
+    )
+  })
+
+  const sharedDirtiedPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_SHARED_DIRTIED_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.shared]) *
+      100
+    )
+  })
+
+  const sharedWrittenPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_SHARED_WRITTEN_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.shared]) *
+      100
+    )
+  })
+
+  const tempReadPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_TEMP_READ_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.temp]) *
+      100
+    )
+  })
+
+  const tempWrittenPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_TEMP_WRITTEN_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.temp]) *
+      100
+    )
+  })
+
+  const localHitPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_LOCAL_HIT_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.local]) *
+      100
+    )
+  })
+
+  const localReadPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_LOCAL_READ_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.local]) *
+      100
+    )
+  })
+
+  const localDirtiedPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_LOCAL_DIRTIED_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.local]) *
+      100
+    )
+  })
+
+  const localWrittenPercent = computed((): number => {
+    return (
+      (node[NodeProp.EXCLUSIVE_LOCAL_WRITTEN_BLOCKS] /
+        plan.value.planStats.maxBlocks?.[BufferLocation.local]) *
+      100
+    )
+  })
+
   return {
     barColor,
     barWidth,
@@ -283,6 +368,16 @@ export default function useNode(
     rowsRemovedClass,
     rowsRemovedPercent,
     rowsRemovedPercentString,
+    sharedHitPercent,
+    sharedReadPercent,
+    sharedDirtiedPercent,
+    sharedWrittenPercent,
+    tempReadPercent,
+    tempWrittenPercent,
+    localHitPercent,
+    localReadPercent,
+    localDirtiedPercent,
+    localWrittenPercent,
     workersLaunchedCount,
     workersPlannedCount,
     workersPlannedCountReversed,

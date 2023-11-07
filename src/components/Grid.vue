@@ -257,22 +257,22 @@ const columns = computed(() => {
         </tr>
         <tr>
           <th class="text-end"></th>
-          <th class="text-end">time</th>
-          <th class="text-end">rows</th>
-          <th class="text-end">estim</th>
-          <th class="text-end" v-if="hasLoops">loops</th>
-          <th class="text-end" v-if="hasFilter">filter</th>
+          <th class="text-center">time</th>
+          <th class="text-center">rows</th>
+          <th class="text-center">estim</th>
+          <th class="text-center" v-if="hasLoops">loops</th>
+          <th class="text-center" v-if="hasFilter">filter</th>
           <th style="width: 100%"></th>
-          <th class="text-end" v-if="hasSharedHit">hit</th>
-          <th class="text-end" v-if="hasSharedRead">read</th>
-          <th class="text-end" v-if="hasSharedDirtied">dirt</th>
-          <th class="text-end" v-if="hasSharedWritten">writ</th>
-          <th class="text-end" v-if="hasTempRead">read</th>
-          <th class="text-end" v-if="hasTempWritten">writ</th>
-          <th class="text-end" v-if="hasLocalHit">hit</th>
-          <th class="text-end" v-if="hasLocalRead">read</th>
-          <th class="text-end" v-if="hasLocalDirtied">dirt</th>
-          <th class="text-end" v-if="hasLocalWritten">writ</th>
+          <th class="text-center" v-if="hasSharedHit">hit</th>
+          <th class="text-center" v-if="hasSharedRead">read</th>
+          <th class="text-center" v-if="hasSharedDirtied">dirt</th>
+          <th class="text-center" v-if="hasSharedWritten">writ</th>
+          <th class="text-center" v-if="hasTempRead">read</th>
+          <th class="text-center" v-if="hasTempWritten">writ</th>
+          <th class="text-center" v-if="hasLocalHit">hit</th>
+          <th class="text-center" v-if="hasLocalRead">read</th>
+          <th class="text-center" v-if="hasLocalDirtied">dirt</th>
+          <th class="text-center" v-if="hasLocalWritten">writ</th>
         </tr>
       </thead>
       <tbody v-for="(flat, index) in plans" :key="index">

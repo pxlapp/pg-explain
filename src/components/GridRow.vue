@@ -14,6 +14,7 @@ import {
 } from "@/filters"
 import LevelDivider from "@/components/LevelDivider.vue"
 import PlanNodeDetail from "@/components/PlanNodeDetail.vue"
+import ProgressPie from "@/components/ProgressPie.vue"
 import useNode from "@/node"
 
 interface Props {
@@ -36,6 +37,16 @@ const {
   rowsRemoved,
   rowsRemovedPercent,
   rowsRemovedPercentString,
+  sharedHitPercent,
+  sharedReadPercent,
+  sharedDirtiedPercent,
+  sharedWrittenPercent,
+  tempReadPercent,
+  tempWrittenPercent,
+  localHitPercent,
+  localReadPercent,
+  localDirtiedPercent,
+  localWrittenPercent,
 } = useNode(plan, node, viewOptions)
 const showDetails = ref<boolean>(false)
 provide("updateSize", () => undefined)
@@ -46,89 +57,59 @@ provide("updateSize", () => undefined)
       <!-- node id -->
       <span class="font-weight-normal">#{{ node.nodeId }} </span>
     </td>
-    <td class="text-end grid-progress-cell text-nowrap">
-      <!-- time -->
-      {{ duration(node[NodeProp.EXCLUSIVE_DURATION]) }}
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          :class="{
-            'border-start': node[NodeProp.EXCLUSIVE_DURATION] > 0,
-          }"
-          style="height: 2px"
-          :style="{
-            width:
-              (node[NodeProp.EXCLUSIVE_DURATION] /
-                (plan.planStats.executionTime ||
-                  plan.content.Plan[NodeProp.ACTUAL_TOTAL_TIME])) *
-                100 +
-              '%',
-          }"
-        ></div>
-        <div
-          class="progress-bar bg-secondary-light"
-          role="progressbar"
-          style="height: 2px"
-          :style="{
-            width:
-              ((node[NodeProp.ACTUAL_TOTAL_TIME] -
-                node[NodeProp.EXCLUSIVE_DURATION]) /
-                (plan.planStats.executionTime ||
-                  plan.content.Plan[NodeProp.ACTUAL_TOTAL_TIME])) *
-                100 +
-              '%',
-          }"
-        ></div>
+    <td class="text-nowrap">
+      <div class="d-flex justify-content-between">
+        <ProgressPie
+          :percentage="
+            (node[NodeProp.EXCLUSIVE_DURATION] /
+              (plan.planStats.executionTime ||
+                plan.content.Plan[NodeProp.ACTUAL_TOTAL_TIME])) *
+            100
+          "
+        ></ProgressPie>
+        <!-- time -->
+        {{ duration(node[NodeProp.EXCLUSIVE_DURATION]) }}
       </div>
     </td>
-    <td class="text-end grid-progress-cell text-nowrap">
-      <!-- rows -->
-      {{ node[NodeProp.ACTUAL_ROWS_REVISED].toLocaleString() }}
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          :class="{
-            'border-start': node[NodeProp.ACTUAL_ROWS_REVISED] > 0,
-          }"
-          style="height: 2px"
-          :style="{
-            width:
-              Math.round(
-                (node[NodeProp.ACTUAL_ROWS_REVISED] / plan.planStats.maxRows) *
-                  100
-              ) + '%',
-          }"
-        ></div>
+    <td class="text-nowrap">
+      <div class="d-flex justify-content-between">
+        <ProgressPie
+          :percentage="
+            (node[NodeProp.ACTUAL_ROWS_REVISED] / plan.planStats.maxRows) * 100
+          "
+        ></ProgressPie>
+        <!-- rows -->
+        {{ node[NodeProp.ACTUAL_ROWS_REVISED].toLocaleString() }}
       </div>
     </td>
-    <td class="text-end grid-progress-cell text-nowrap">
-      <!-- estimation -->
-      <span v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1">
-        <span
-          v-html="factor(node[NodeProp.PLANNER_ESTIMATE_FACTOR] || 0)"
-        ></span>
-        <span
-          v-if="
-            node[NodeProp.PLANNER_ESTIMATE_DIRECTION] ===
-            EstimateDirection.under
-          "
-        >
-          ↓
+    <td class="text-nowrap">
+      <div
+        v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1"
+        class="d-flex justify-content-between"
+      >
+        <ProgressPie :percentage="estimateFactorPercent"></ProgressPie>
+        <!-- estimation -->
+        <span v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1">
+          <span
+            v-html="factor(node[NodeProp.PLANNER_ESTIMATE_FACTOR] || 0)"
+          ></span>
+          <span
+            v-if="
+              node[NodeProp.PLANNER_ESTIMATE_DIRECTION] ===
+              EstimateDirection.under
+            "
+          >
+            ↓
+          </span>
+          <span
+            v-if="
+              node[NodeProp.PLANNER_ESTIMATE_DIRECTION] ===
+              EstimateDirection.over
+            "
+          >
+            ↑
+          </span>
         </span>
-        <span
-          v-if="
-            node[NodeProp.PLANNER_ESTIMATE_DIRECTION] === EstimateDirection.over
-          "
-        >
-          ↑
-        </span>
-      </span>
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          style="height: 2px"
-          :style="{ width: estimateFactorPercent + '%' }"
-        ></div>
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('loops')">
@@ -137,21 +118,12 @@ provide("updateSize", () => undefined)
         {{ node[NodeProp.ACTUAL_LOOPS] }}
       </span>
     </td>
-    <td
-      class="text-end grid-progress-cell text-nowrap"
-      v-if="columns.includes('filter')"
-    >
+    <td class="text-nowrap" v-if="columns.includes('filter')">
       <!-- filter -->
-      <template v-if="rowsRemoved">
+      <div v-if="rowsRemoved" class="d-flex justify-content-between">
+        <ProgressPie :percentage="rowsRemovedPercent"></ProgressPie>
         <span>{{ rowsRemovedPercentString }}%</span>
-        <div class="grid-progress progress rounded-0 bg-transparent">
-          <div
-            class="bg-primary"
-            style="height: 2px"
-            :style="{ width: rowsRemovedPercent + '%' }"
-          ></div>
-        </div>
-      </template>
+      </div>
     </td>
     <td
       class="node-type"
@@ -247,61 +219,91 @@ provide("updateSize", () => undefined)
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('shared.hit')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_HIT_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="sharedHitPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_HIT_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_SHARED_HIT_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('shared.read')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_READ_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="sharedReadPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_READ_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_SHARED_READ_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('shared.dirtied')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_DIRTIED_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="sharedDirtiedPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_DIRTIED_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_SHARED_DIRTIED_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('shared.written')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_WRITTEN_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="sharedWrittenPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_SHARED_WRITTEN_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_SHARED_WRITTEN_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('temp.read')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_TEMP_READ_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="tempReadPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_TEMP_READ_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_TEMP_READ_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('temp.written')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_TEMP_WRITTEN_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="tempWrittenPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_TEMP_WRITTEN_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_TEMP_WRITTEN_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('local.hit')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_HIT_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="localHitPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_HIT_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_LOCAL_HIT_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('local.read')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_READ_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="localReadPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_READ_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_LOCAL_READ_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('local.dirtied')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_DIRTIED_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="localDirtiedPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_DIRTIED_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_LOCAL_DIRTIED_BLOCKS]) }}
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('local.written')">
-      {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_WRITTEN_BLOCKS]) }}
+      <div class="d-flex justify-content-between">
+        <ProgressPie :percentage="localWrittenPercent"></ProgressPie>
+        {{ blocks(node[NodeProp.EXCLUSIVE_LOCAL_WRITTEN_BLOCKS]) }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ blocksAsBytes(node[NodeProp.EXCLUSIVE_LOCAL_WRITTEN_BLOCKS]) }}
       </div>
