@@ -46,89 +46,111 @@ provide("updateSize", () => undefined)
       <!-- node id -->
       <span class="font-weight-normal">#{{ node.nodeId }} </span>
     </td>
-    <td class="text-end grid-progress-cell text-nowrap">
-      <!-- time -->
-      {{ duration(node[NodeProp.EXCLUSIVE_DURATION]) }}
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          :class="{
-            'border-start': node[NodeProp.EXCLUSIVE_DURATION] > 0,
-          }"
-          style="height: 2px"
-          :style="{
-            width:
-              (node[NodeProp.EXCLUSIVE_DURATION] /
-                (plan.planStats.executionTime ||
-                  plan.content.Plan[NodeProp.ACTUAL_TOTAL_TIME])) *
-                100 +
-              '%',
-          }"
-        ></div>
-        <div
-          class="progress-bar bg-secondary-light"
-          role="progressbar"
-          style="height: 2px"
-          :style="{
-            width:
-              ((node[NodeProp.ACTUAL_TOTAL_TIME] -
-                node[NodeProp.EXCLUSIVE_DURATION]) /
-                (plan.planStats.executionTime ||
-                  plan.content.Plan[NodeProp.ACTUAL_TOTAL_TIME])) *
-                100 +
-              '%',
-          }"
-        ></div>
+    <td class="text-nowrap">
+      <div class="d-flex justify-content-between">
+        <svg height="1em" width="1em" viewBox="0 0 20 20" class="me-1">
+          <circle
+            r="10"
+            cx="10"
+            cy="10"
+            fill="white"
+            stroke="#ccc"
+            stroke-width="1"
+          />
+          <circle
+            r="5"
+            cx="10"
+            cy="10"
+            fill="transparent"
+            stroke="blue"
+            stroke-width="10"
+            :stroke-dasharray="`calc(${
+              node[NodeProp.EXCLUSIVE_DURATION] /
+              (plan.planStats.executionTime ||
+                plan.content.Plan[NodeProp.ACTUAL_TOTAL_TIME])
+            } * 31.4) 31.4`"
+            transform="rotate(-90) translate(-20)"
+          />
+        </svg>
+        <!-- time -->
+        {{ duration(node[NodeProp.EXCLUSIVE_DURATION]) }}
       </div>
     </td>
-    <td class="text-end grid-progress-cell text-nowrap">
-      <!-- rows -->
-      {{ node[NodeProp.ACTUAL_ROWS_REVISED].toLocaleString() }}
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          :class="{
-            'border-start': node[NodeProp.ACTUAL_ROWS_REVISED] > 0,
-          }"
-          style="height: 2px"
-          :style="{
-            width:
-              Math.round(
-                (node[NodeProp.ACTUAL_ROWS_REVISED] / plan.planStats.maxRows) *
-                  100
-              ) + '%',
-          }"
-        ></div>
+    <td class="text-nowrap">
+      <div class="d-flex justify-content-between">
+        <svg height="1em" width="1em" viewBox="0 0 20 20" class="me-1">
+          <circle
+            r="10"
+            cx="10"
+            cy="10"
+            fill="white"
+            stroke="#ccc"
+            stroke-width="1"
+          />
+          <circle
+            r="5"
+            cx="10"
+            cy="10"
+            fill="transparent"
+            stroke="blue"
+            stroke-width="10"
+            :stroke-dasharray="`calc(${
+              node[NodeProp.ACTUAL_ROWS_REVISED] / plan.planStats.maxRows
+            } * 31.4) 31.4`"
+            transform="rotate(-90) translate(-20)"
+          />
+        </svg>
+        <!-- rows -->
+        {{ node[NodeProp.ACTUAL_ROWS_REVISED].toLocaleString() }}
       </div>
     </td>
-    <td class="text-end grid-progress-cell text-nowrap">
-      <!-- estimation -->
-      <span v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1">
-        <span
-          v-html="factor(node[NodeProp.PLANNER_ESTIMATE_FACTOR] || 0)"
-        ></span>
-        <span
-          v-if="
-            node[NodeProp.PLANNER_ESTIMATE_DIRECTION] ===
-            EstimateDirection.under
-          "
-        >
-          ↓
+    <td class="text-nowrap">
+      <div
+        v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1"
+        class="d-flex justify-content-between"
+      >
+        <svg height="1em" width="1em" viewBox="0 0 20 20" class="me-1">
+          <circle
+            r="10"
+            cx="10"
+            cy="10"
+            fill="white"
+            stroke="#ccc"
+            stroke-width="1"
+          />
+          <circle
+            r="5"
+            cx="10"
+            cy="10"
+            fill="transparent"
+            stroke="blue"
+            stroke-width="10"
+            :stroke-dasharray="`calc(${estimateFactorPercent} / 100 * 31.4) 31.4`"
+            transform="rotate(-90) translate(-20)"
+          />
+        </svg>
+        <!-- estimation -->
+        <span v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1">
+          <span
+            v-html="factor(node[NodeProp.PLANNER_ESTIMATE_FACTOR] || 0)"
+          ></span>
+          <span
+            v-if="
+              node[NodeProp.PLANNER_ESTIMATE_DIRECTION] ===
+              EstimateDirection.under
+            "
+          >
+            ↓
+          </span>
+          <span
+            v-if="
+              node[NodeProp.PLANNER_ESTIMATE_DIRECTION] ===
+              EstimateDirection.over
+            "
+          >
+            ↑
+          </span>
         </span>
-        <span
-          v-if="
-            node[NodeProp.PLANNER_ESTIMATE_DIRECTION] === EstimateDirection.over
-          "
-        >
-          ↑
-        </span>
-      </span>
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          style="height: 2px"
-          :style="{ width: estimateFactorPercent + '%' }"
-        ></div>
       </div>
     </td>
     <td class="text-end text-nowrap" v-if="columns.includes('loops')">
@@ -137,21 +159,31 @@ provide("updateSize", () => undefined)
         {{ node[NodeProp.ACTUAL_LOOPS] }}
       </span>
     </td>
-    <td
-      class="text-end grid-progress-cell text-nowrap"
-      v-if="columns.includes('filter')"
-    >
+    <td class="text-nowrap" v-if="columns.includes('filter')">
       <!-- filter -->
-      <template v-if="rowsRemoved">
+      <div v-if="rowsRemoved" class="d-flex justify-content-between">
+        <svg height="1em" width="1em" viewBox="0 0 20 20" class="me-1">
+          <circle
+            r="10"
+            cx="10"
+            cy="10"
+            fill="white"
+            stroke="#ccc"
+            stroke-width="1"
+          />
+          <circle
+            r="5"
+            cx="10"
+            cy="10"
+            fill="transparent"
+            stroke="blue"
+            stroke-width="10"
+            :stroke-dasharray="`calc(${rowsRemovedPercent} / 100 * 31.4) 31.4`"
+            transform="rotate(-90) translate(-20)"
+          />
+        </svg>
         <span>{{ rowsRemovedPercentString }}%</span>
-        <div class="grid-progress progress rounded-0 bg-transparent">
-          <div
-            class="bg-primary"
-            style="height: 2px"
-            :style="{ width: rowsRemovedPercent + '%' }"
-          ></div>
-        </div>
-      </template>
+      </div>
     </td>
     <td
       class="node-type"
