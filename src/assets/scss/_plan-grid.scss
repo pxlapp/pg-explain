@@ -37,9 +37,12 @@ $grid-progress-padding: 0.25rem;
     position: absolute;
     width: 100%;
     height: initial;
-    top: 0;
+    //top: 0;
     left: 0;
+    height: 1em;
     padding-left: $grid-progress-padding;
     padding-right: $grid-progress-padding;
+    z-index: 0;
+    opacity: 0.3;
   }
 }

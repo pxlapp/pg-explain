@@ -15,6 +15,7 @@ import {
 } from "@/filters"
 import LevelDivider from "@/components/LevelDivider.vue"
 import PlanNodeDetail from "@/components/PlanNodeDetail.vue"
+import GridProgressBar from "@/components/GridProgressBar.vue"
 import useNode from "@/node"
 
 interface Props {
@@ -64,8 +65,18 @@ function formattedProp(propName: keyof typeof NodeProp) {
       <span class="font-weight-normal">#{{ node.nodeId }} </span>
     </td>
     <td class="text-end grid-progress-cell text-nowrap">
+      <GridProgressBar
+        :percentage="
+          (node[NodeProp.EXCLUSIVE_DURATION] /
+            (plan.planStats.executionTime ||
+              plan.content.Plan[NodeProp.ACTUAL_TOTAL_TIME])) *
+          100
+        "
+      ></GridProgressBar>
       <!-- time -->
-      {{ Math.round(node[NodeProp.EXCLUSIVE_DURATION]).toLocaleString() }}
+      <div class="position-relative">
+        {{ Math.round(node[NodeProp.EXCLUSIVE_DURATION]).toLocaleString() }}
+      </div>
       <div v-if="showDetails" class="small">
         {{ duration(node[NodeProp.EXCLUSIVE_DURATION]) }}
       </div>
@@ -101,29 +112,24 @@ function formattedProp(propName: keyof typeof NodeProp) {
         ></div>
       </div>
     </td>
-    <td class="text-end grid-progress-cell text-nowrap">
+    <td class="text-end grid-progress-cell text-nowrap bg-transparent">
+      <GridProgressBar
+        :percentage="
+          (node[NodeProp.ACTUAL_ROWS_REVISED] / plan.planStats.maxRows) * 100
+        "
+      ></GridProgressBar>
       <!-- rows -->
-      {{ tilde + node[NodeProp.ACTUAL_ROWS_REVISED]?.toLocaleString() }}
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          :class="{
-            'border-start': node[NodeProp.ACTUAL_ROWS_REVISED] > 0,
-          }"
-          style="height: 2px"
-          :style="{
-            width:
-              Math.round(
-                (node[NodeProp.ACTUAL_ROWS_REVISED] / plan.planStats.maxRows) *
-                  100
-              ) + '%',
-          }"
-        ></div>
+      <div class="position-relative">
+        {{ tilde + node[NodeProp.ACTUAL_ROWS_REVISED]?.toLocaleString() }}
       </div>
     </td>
     <td class="text-end grid-progress-cell text-nowrap">
+      <GridProgressBar :percentage="estimateFactorPercent"></GridProgressBar>
       <!-- estimation -->
-      <span v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1">
+      <div
+        class="position-relative"
+        v-if="node[NodeProp.PLANNER_ESTIMATE_FACTOR] != 1"
+      >
         <span
           v-html="factor(node[NodeProp.PLANNER_ESTIMATE_FACTOR] || 0)"
         ></span>
@@ -142,13 +148,6 @@ function formattedProp(propName: keyof typeof NodeProp) {
         >
           ↑
         </span>
-      </span>
-      <div class="grid-progress progress rounded-0 bg-transparent">
-        <div
-          class="bg-primary border-primary"
-          style="height: 2px"
-          :style="{ width: estimateFactorPercent + '%' }"
-        ></div>
       </div>
       <div v-if="showDetails" class="small">
         Planned:<br />
@@ -168,13 +167,7 @@ function formattedProp(propName: keyof typeof NodeProp) {
       <!-- filter -->
       <template v-if="rowsRemoved">
         <span>{{ rowsRemovedPercentString }}%</span>
-        <div class="grid-progress progress rounded-0 bg-transparent">
-          <div
-            class="bg-primary"
-            style="height: 2px"
-            :style="{ width: rowsRemovedPercent + '%' }"
-          ></div>
-        </div>
+        <GridProgressBar :percentage="rowsRemovedPercent"></GridProgressBar>
         <div v-if="showDetails" class="small">
           {{ tilde + formattedProp(rowsRemovedProp) }}
         </div>
