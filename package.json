@@ -1,7 +1,7 @@
 {
-  "name": "pev2",
+  "name": "pg-explain",
   "version": "1.8.0",
-  "homepage": "https://github.com/dalibo/pev2",
+  "homepage": "https://github.com/pxlapp/pg-explain",
   "license": "PostgreSQL license",
   "files": [
     "dist"
